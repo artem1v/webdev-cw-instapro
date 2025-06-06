@@ -6,6 +6,9 @@ export function renderPostsPageComponent({ appEl }) {
   // @TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
 
+
+
+  
   /**
    * @TODO: чтобы отформатировать дату создания поста в виде "19 минут назад"
    * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
