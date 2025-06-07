@@ -20,7 +20,7 @@ export let user = getUserFromLocalStorage();
 export let page = null;
 export let posts = [];
 
-const getToken = () => {
+export const getToken = () => {
   const token = user ? `Bearer ${user.token}` : undefined;
   return token;
 };
@@ -66,24 +66,22 @@ export const goToPage = (newPage, data) => {
         });
     }
 
-if (newPage === USER_POSTS_PAGE) {
-  page = LOADING_PAGE;
-  renderApp();
-
-  return getUserPosts({ token: getToken(), userId: data.userId })
-    .then((newPosts) => {
+    if (newPage === USER_POSTS_PAGE) {
+      // @@TODO: реализовать получение постов юзера из API
+      console.log("Открываю страницу пользователя: ", data.userId);
       page = USER_POSTS_PAGE;
-      posts = newPosts;
-      renderApp();
-    })
-    .catch((error) => {
-      console.error(error);
-      goToPage(POSTS_PAGE);
-    });
-}
+      posts = [];
+      return renderApp();
+    }
+
+    page = newPage;
+    renderApp();
+
+    return;
+  }
+
   throw new Error("страницы не существует");
 };
-}
 
 const renderApp = () => {
   const appEl = document.getElementById("app");
@@ -125,11 +123,20 @@ const renderApp = () => {
     });
   }
 
-  if (page === USER_POSTS_PAGE) {
-    // @TODO: реализовать страницу с фотографиями отдельного пользвателя
-    appEl.innerHTML = "Здесь будет страница фотографий пользователя";
-    return;
-  }
-};
+  if (newPage === USER_POSTS_PAGE) {
+  page = LOADING_PAGE;
+  renderApp();
 
+  return getUserPosts({ token: getToken(), userId: data.userId })
+    .then((newPosts) => {
+      page = USER_POSTS_PAGE;
+      posts = newPosts;
+      renderApp();
+    })
+    .catch((error) => {
+      console.error(error);
+      goToPage(POSTS_PAGE);
+    });
+}
+}
 goToPage(POSTS_PAGE);

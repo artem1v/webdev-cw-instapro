@@ -1,8 +1,8 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
+import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@3/+esm";
+import * as ruLocale from "https://cdn.jsdelivr.net/npm/date-fns@3/locale/ru/+esm";
 
 export function renderPostsPageComponent({ appEl }) {
   const appHtml = `
@@ -39,7 +39,7 @@ export function renderPostsPageComponent({ appEl }) {
             <p class="post-date">
               ${formatDistanceToNow(new Date(post.createdAt), {
                 addSuffix: true,
-                locale: ru,
+                locale: ruLocale.default,
               })}
             </p>
           </li>
@@ -56,7 +56,6 @@ export function renderPostsPageComponent({ appEl }) {
     element: document.querySelector(".header-container"),
   });
 
-  // Обработчик клика на пользователя (переход на его страницу)
   document.querySelectorAll(".post-header").forEach((userEl) => {
     userEl.addEventListener("click", () => {
       goToPage(USER_POSTS_PAGE, {
@@ -65,11 +64,13 @@ export function renderPostsPageComponent({ appEl }) {
     });
   });
 
-  // Обработчик лайков 
-  document.querySelectorAll(".like-button").forEach(button => {
+document.querySelectorAll(".like-button").forEach((button) => {
   button.addEventListener("click", () => {
-    likePost({ token: getToken(), postId: button.dataset.postId })
-      .then(() => goToPage(POSTS_PAGE)); // Обновляем страницу
+    likePost({ token: getToken(), postId: button.dataset.postId }).then(() =>
+      goToPage(POSTS_PAGE)
+    ); // Обновляем страницу
   });
 });
+
 }
+

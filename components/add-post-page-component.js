@@ -1,8 +1,10 @@
 import { renderUploadImageComponent } from "./upload-image-component.js";
 import { uploadImage, addPost } from "../api.js";
-import { goToPage } from "../index.js";
+import { goToPage, getToken } from "../index.js";
+import { POSTS_PAGE } from "../routes.js";
 
-export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
+
+export function renderAddPostPageComponent({ appEl }) {
   let imageUrl = "";
 
   const render = () => {
@@ -43,7 +45,18 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
         return;
       }
 
-      onAddPostClick({ description, imageUrl });
+      addPost({
+        token: getToken(),
+        description,
+        imageUrl,
+      })
+        .then(() => {
+          goToPage(POSTS_PAGE);
+        })
+        .catch((error) => {
+          console.error("Ошибка добавления поста:", error);
+          alert(error.message);
+        });
     });
   };
 
