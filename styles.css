@@ -196,3 +196,80 @@
   width: 100%;
   text-align: center;
 }
+
+.posts-user-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.posts-user-header__user-image {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.posts-user-header__user-name {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.error-text {
+  color: #ff3333;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.posts-user-header {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.posts-user-header__user-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.posts-user-header__user-name {
+  font-size: 24px;
+  margin: 0;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.like-button img {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+}
+
+.like-button:hover img {
+  transform: scale(1.1);
+}
+
+.like-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

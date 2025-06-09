@@ -3,6 +3,8 @@ import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
 import { formatDistanceToNow } from "https://cdn.jsdelivr.net/npm/date-fns@3/+esm";
 import * as ruLocale from "https://cdn.jsdelivr.net/npm/date-fns@3/locale/ru/+esm";
+import { likePost } from "../api.js";
+import { getToken } from "../index.js";
 
 export function renderPostsPageComponent({ appEl }) {
   const appHtml = `
@@ -64,13 +66,52 @@ export function renderPostsPageComponent({ appEl }) {
     });
   });
 
-document.querySelectorAll(".like-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    likePost({ token: getToken(), postId: button.dataset.postId }).then(() =>
-      goToPage(POSTS_PAGE)
-    ); // Обновляем страницу
+  document.querySelectorAll(".post-header").forEach((userEl) => {
+  userEl.addEventListener("click", () => {
+    const userId = userEl.dataset.userId;
+    console.log("Переход на страницу пользователя с ID:", userId); // Добавьте эту строку
+    goToPage(USER_POSTS_PAGE, {
+      userId: userId
+    });
   });
 });
 
-}
+  document.querySelectorAll(".like-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const postId = button.dataset.postId;
+    const likeImg = button.querySelector("img");
+    const likesCountEl = button.nextElementSibling.querySelector("strong");
+    
+    if (!user) {
+      alert("Для оценки поста необходимо авторизоваться");
+      goToPage(AUTH_PAGE);
+      return;
+    }
 
+    // Визуальное изменение до ответа сервера (оптимистичное обновление)
+    const isLiked = likeImg.src.includes("like-active.svg");
+    const currentLikes = parseInt(likesCountEl.textContent);
+    
+    likeImg.src = isLiked 
+      ? "./assets/images/like-not-active.svg" 
+      : "./assets/images/like-active.svg";
+      
+    likesCountEl.textContent = isLiked ? currentLikes - 1 : currentLikes + 1;
+
+    // Отправка запроса на сервер
+    likePost({ 
+      token: getToken(),
+      postId: postId
+    })
+    .catch((error) => {
+      console.error("Ошибка при лайке:", error);
+      // Откатываем изменения, если запрос не удался
+      likeImg.src = isLiked 
+        ? "./assets/images/like-active.svg" 
+        : "./assets/images/like-not-active.svg";
+      likesCountEl.textContent = currentLikes;
+      alert("Не удалось поставить лайк. Попробуйте ещё раз.");
+    });
+  });
+});
+}

@@ -69,21 +69,43 @@ export function uploadImage({ file }) {
 }
 
 export function getUserPosts({ token, userId }) {
+  console.log("Запрос постов пользователя с ID:", userId); // Добавьте эту строку
   return fetch(`${postsHost}/user-posts/${userId}`, {
     method: "GET",
     headers: {
       Authorization: token,
     },
-  }).then((response) => response.json());
+  })
+  .then(response => {
+    console.log("Ответ сервера:", response); // И эту
+    if (response.status === 404) {
+      throw new Error("Пользователь не найден");
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Полученные данные:", data); // И эту
+    return data.posts || [];
+  });
 }
 
 export function likePost({ token, postId }) {
+  if (!token) {
+    return Promise.reject(new Error("Требуется авторизация"));
+  }
+  
   return fetch(`${postsHost}/${postId}/like`, {
     method: "POST",
     headers: {
       Authorization: token,
     },
-  }).then((response) => response.json());
+  })
+  .then((response) => {
+    if (response.status === 401) {
+      throw new Error("Необходимо авторизоваться");
+    }
+    return response.json();
+  });
 }
 
 export function addPost({ token, description, imageUrl }) {
