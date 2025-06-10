@@ -33,7 +33,7 @@ export const logout = () => {
 };
 
 export const goToPage = (newPage, newData) => {
-  const validPages = [
+    const validPages = [
     POSTS_PAGE,
     USER_POSTS_PAGE,
     AUTH_PAGE,
@@ -41,17 +41,57 @@ export const goToPage = (newPage, newData) => {
     LOADING_PAGE,
   ];
 
+  if (newPage === AUTH_PAGE) {
+    page = AUTH_PAGE;
+    data = newData || null;
+    return renderApp();
+  }
+
   if (!validPages.includes(newPage)) {
-    console.error("Попытка перехода на несуществующую страницу:", newPage);
     return goToPage(POSTS_PAGE);
   }
 
   data = newData || null;
   page = newPage;
 
-  if (newPage === ADD_POSTS_PAGE && !user) {
+  if (newPage === AUTH_PAGE) {
     page = AUTH_PAGE;
+    data = newData || null;
     return renderApp();
+  }
+
+  if (newPage === ADD_POSTS_PAGE) {
+    if (!user) {
+      return goToPage(AUTH_PAGE);
+    }
+
+    page = ADD_POSTS_PAGE;
+    return renderApp();
+  }
+
+  if (page === ADD_POSTS_PAGE) {
+    if (!user) {
+      return goToPage(AUTH_PAGE);
+    }
+    return renderAddPostPageComponent({
+      appEl,
+      onAddPostClick({ description, imageUrl }) {
+        console.log("Обработчик добавления поста");
+        addPost({
+          token: getToken(),
+          description,
+          imageUrl,
+        })
+          .then(() => {
+            console.log("Успешное добавление, переход на ленту");
+            goToPage(POSTS_PAGE);
+          })
+          .catch((error) => {
+            console.error("Ошибка добавления:", error);
+            alert(error.message);
+          });
+      },
+    });
   }
 
   if (newPage === POSTS_PAGE || newPage === USER_POSTS_PAGE) {
@@ -107,7 +147,6 @@ export const goToPage = (newPage, newData) => {
 
 const renderApp = () => {
   const appEl = document.getElementById("app");
-
   switch (page) {
     case LOADING_PAGE:
       return renderLoadingPageComponent({ appEl, user, goToPage });

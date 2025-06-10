@@ -76,31 +76,30 @@ export function getUserPosts({ token, userId }) {
       Authorization: token,
     },
   })
-  .then(response => {
-    console.log("Ответ сервера:", response); // И эту
-    if (response.status === 404) {
-      throw new Error("Пользователь не найден");
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log("Полученные данные:", data); // И эту
-    return data.posts || [];
-  });
+    .then((response) => {
+      console.log("Ответ сервера:", response); // И эту
+      if (response.status === 404) {
+        throw new Error("Пользователь не найден");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Полученные данные:", data); // И эту
+      return data.posts || [];
+    });
 }
 
 export function likePost({ token, postId }) {
   if (!token) {
     return Promise.reject(new Error("Требуется авторизация"));
   }
-  
+
   return fetch(`${postsHost}/${postId}/like`, {
     method: "POST",
     headers: {
       Authorization: token,
     },
-  })
-  .then((response) => {
+  }).then((response) => {
     if (response.status === 401) {
       throw new Error("Необходимо авторизоваться");
     }
@@ -118,12 +117,48 @@ export function addPost({ token, description, imageUrl }) {
       description,
       imageUrl,
     }),
-  })
-    .then((response) => {
-      if (response.status === 401) {
-        throw new Error("Нет авторизации");
-      }
-      return response.json();
-    });
+  }).then((response) => {
+    if (!response.ok) {
+      return response.json().then((err) => {
+        throw new Error(err.message || "Не удалось добавить пост");
+      });
+    }
+    return response.json();
+  });
 }
+
+export function updateUser({ token, imageUrl }) {
+  return fetch(`${baseHost}/api/user`, {
+    method: "PATCH",
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ imageUrl }),
+  }).then((response) => {
+    if (response.status === 401) throw new Error("Нет авторизации");
+    if (!response.ok) throw new Error("Ошибка обновления");
+    return response.json();
+  });
+}
+
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  const response = await fetch(`${API_URL}/upload-avatar`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Upload failed');
+  }
+
+  return response.json();
+};
 

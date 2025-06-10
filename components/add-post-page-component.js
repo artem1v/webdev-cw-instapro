@@ -3,9 +3,9 @@ import { uploadImage, addPost } from "../api.js";
 import { goToPage, getToken } from "../index.js";
 import { POSTS_PAGE } from "../routes.js";
 
-
 export function renderAddPostPageComponent({ appEl }) {
   let imageUrl = "";
+  let imageFile = null;
 
   const render = () => {
     const appHtml = `
@@ -16,7 +16,8 @@ export function renderAddPostPageComponent({ appEl }) {
           <div class="form-inputs">
             <div class="upload-image-container"></div>
             <textarea id="description-input" class="textarea" placeholder="Описание"></textarea>
-            <div class="form-error"></div>
+            <div id="description-error" class="form-error hidden">Добавьте описание</div>
+            <div id="image-error" class="form-error hidden">Загрузите изображение</div>
             <button class="button" id="add-button">Добавить</button>
           </div>
         </div>
@@ -29,21 +30,59 @@ export function renderAddPostPageComponent({ appEl }) {
       element: document.querySelector(".upload-image-container"),
       onImageUrlChange(newImageUrl) {
         imageUrl = newImageUrl;
+        if (newImageUrl) {
+          document.getElementById("image-error").classList.add("hidden");
+        }
       },
     });
 
     document.getElementById("add-button").addEventListener("click", () => {
-      const description = document.getElementById("description-input").value.trim();
+      const description = document
+        .getElementById("description-input")
+        .value.trim();
+      const descriptionError = document.getElementById("description-error");
+      const imageError = document.getElementById("image-error");
+      let isValid = true;
 
+      document
+        .getElementById("description-input")
+        .addEventListener("input", (e) => {
+          if (e.target.value.trim()) {
+            document
+              .getElementById("description-error")
+              .classList.add("hidden");
+            e.target.classList.remove("input-error");
+          }
+        });
+
+      document
+        .querySelector(".upload-image-container")
+        .addEventListener("change", () => {
+          document.getElementById("image-error").classList.add("hidden");
+        });
+
+      // Валидация описания
       if (!description) {
-        alert("Введите описание");
-        return;
+        descriptionError.classList.remove("hidden");
+        isValid = false;
+      } else {
+        descriptionError.classList.add("hidden");
       }
 
+      // Валидация изображения
       if (!imageUrl) {
-        alert("Загрузите изображение");
-        return;
+        imageError.classList.remove("hidden");
+        isValid = false;
+      } else {
+        imageError.classList.add("hidden");
       }
+
+      if (!isValid) return;
+
+      // Показываем лоадер
+      const button = document.getElementById("add-button");
+      button.disabled = true;
+      button.textContent = "Добавляем...";
 
       addPost({
         token: getToken(),
@@ -55,7 +94,11 @@ export function renderAddPostPageComponent({ appEl }) {
         })
         .catch((error) => {
           console.error("Ошибка добавления поста:", error);
-          alert(error.message);
+          alert(`Ошибка: ${error.message}`);
+        })
+        .finally(() => {
+          button.disabled = false;
+          button.textContent = "Добавить";
         });
     });
   };
